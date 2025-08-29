@@ -1,0 +1,30 @@
+# Dataset & hasil proses
+data/
+features/
+output/
+
+# Jupyter Notebook checkpoint
+**/.ipynb_checkpoints/
+
+# File Python cache
+__pycache__/
+*.pyc
+
+# Environment/virtualenv
+.env
+.venv/
+env/
+venv/
+
+# VSCode settings
+.vscode/
+
+# Mac/Windows/other OS files
+.DS_Store
+Thumbs.db
+
+# Model/large files (jika ada)
+*.h5
+*.pt
+*.pkl
+*.joblib

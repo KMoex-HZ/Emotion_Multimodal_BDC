@@ -1,0 +1,13 @@
+numpy
+pandas
+tqdm
+opencv-python
+librosa
+matplotlib
+seaborn
+scikit-learn
+imbalanced-learn
+tensorflow
+torch
+transformers
+whisper
