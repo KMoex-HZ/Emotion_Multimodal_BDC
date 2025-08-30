@@ -135,7 +135,7 @@ Model performa **sangat baik**, dengan tantangan utama di kelas **Proud/Surprise
 
 - **Untuk Submission:**
 
-  - Pastikan prediksi data test disimpan dalam format `submission+NamaTim.csv` sesuai template.
+  - Prediksi data test disimpan dalam format `submission+NamaTim.csv` sesuai template.
   - Format kolom: `id, predicted` (0–7 sesuai label mapping).
 
 ---
