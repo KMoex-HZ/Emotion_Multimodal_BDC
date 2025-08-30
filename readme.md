@@ -16,6 +16,10 @@ Setiap video harus diklasifikasikan ke dalam salah satu dari 8 kategori emosi:
 
 Metrik evaluasi utama adalah **Macro-averaged F1-Score**.
 
+<div align="center">
+  <img src="src/t-SNE.png" alt="Grafik t-SNE" width="600">
+</div>
+
 ---
 
 ## 📂 Struktur Dataset
