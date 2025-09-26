@@ -1,5 +1,6 @@
 # Dataset & hasil proses
-data/
+data/video/
+data/wav/
 output/
 
 # Jupyter Notebook checkpoint
