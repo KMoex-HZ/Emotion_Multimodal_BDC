@@ -1,45 +1,45 @@
 # 📑 Big Data Challenge (BDC) Satria Data 2025 – Emotion Classification
 
-## 📌 Pendahuluan
+## 📌 Introduction
 
-Kompetisi **Big Data Challenge (BDC) Satria Data 2025** menantang peserta untuk membangun model klasifikasi emosi berbasis data multimedia (video).
-Setiap video harus diklasifikasikan ke dalam salah satu dari 8 kategori emosi:
+The **Big Data Challenge (BDC) Satria Data 2025** competition challenges participants to build an emotion classification model based on multimedia data (video).
+Each video must be classified into one of the following 8 emotion categories:
 
-- Proud (Bangga)
-- Trust (Percaya)
-- Joy (Bahagia)
-- Surprise (Terkejut)
-- Neutral (Netral)
-- Sadness (Sedih)
-- Fear (Takut)
-- Anger (Marah)
+* Proud
+* Trust
+* Joy
+* Surprise
+* Neutral
+* Sadness
+* Fear
+* Anger
 
-Metrik evaluasi utama adalah **Macro-averaged F1-Score**.
+The primary evaluation metric is **Macro-averaged F1-Score**.
 
 <div align="center">
-  <img src="src/t-SNE.png" alt="Grafik t-SNE" width="600">
+  <img src="src/t-SNE.png" alt="t-SNE Visualization" width="600">
 </div>
 
 ---
 
-## 📂 Struktur Dataset
+## 📂 Dataset Structure
 
-Panitia memberikan dua file CSV:
+The organizers provided two CSV files:
 
-- **datatrain.csv** → `id, video (URL IG), emotion` (803 video, berlabel)
-- **datatest.csv** → `id, video (URL IG)` (200 video, tanpa label, untuk submission)
+* **datatrain.csv** → `id, video (IG URL), emotion` (803 labeled videos)
+* **datatest.csv** → `id, video (IG URL)` (200 unlabeled videos, for submission)
 
-Hasil observasi:
+Observation results:
 
-- Train: 803 total → ✅ 775 berhasil diunduh, ❌ 28 gagal (video dihapus/private)
-- Test: 200 total → ✅ 198 berhasil diunduh, ❌ 2 gagal
+* Train: 803 total → ✅ 775 successfully downloaded, ❌ 28 failed (videos deleted/private)
+* Test: 200 total → ✅ 198 successfully downloaded, ❌ 2 failed
 
-Video diunduh menggunakan `yt_dlp` dan disimpan dalam struktur folder:
+Videos were downloaded using `yt_dlp` and stored in the following folder structure:
 
 ```
 data/
-  raw/              # file CSV asli dari panitia
-  processed/        # CSV yang sudah diperbaiki (label typo dibenarkan)
+  raw/              # original CSV files from the organizers
+  processed/        # corrected CSV files (typo labels fixed)
   video/
     train/
     test/
@@ -49,94 +49,94 @@ data/
 
 ## ⚙️ Preprocessing & Feature Extraction
 
-1. **Perbaikan Label**
+1. **Label Correction**
 
-   - Beberapa label typo (contoh: `trst` → `trust`) → dibersihkan, disimpan di `processed/`.
+   * Several label typos (e.g., `trst` → `trust`) → cleaned and saved in `processed/`.
 
 2. **Audio Extraction**
 
-   - Convert `.mp4 → .wav` pakai `ffmpeg`
-   - Ekstraksi fitur pakai **Librosa** → simpan ke `.npy`
-   - Struktur: `features/audio/{train,test}`
+   * Convert `.mp4 → .wav` using `ffmpeg`
+   * Feature extraction using **Librosa** → saved as `.npy`
+   * Structure: `features/audio/{train,test}`
 
 3. **Visual Extraction**
 
-   - Ambil frame per video pakai `cv2`
-   - Ekstraksi fitur per frame pakai **ResNet50** (2048 dimensi)
-   - Disimpan di folder `features/visual/`
+   * Extract frames per video using `cv2`
+   * Frame-level feature extraction using **ResNet50** (2048 dimensions)
+   * Saved in `features/visual/`
 
 4. **Text Extraction**
 
-   - Transkripsi suara pakai **Whisper** → teks
-   - Representasi teks pakai **IndoBERT** (768 dimensi)
-   - Disimpan di folder `features/text/`
+   * Speech transcription using **Whisper** → text
+   * Text representation using **IndoBERT** (768 dimensions)
+   * Saved in `features/text/`
 
-5. **Gabungan Fitur**
+5. **Feature Fusion**
 
-   - Audio (20) + Visual (2048) + Text (768) → Total **2836 dimensi** per video
-   - Bentuk dataset akhir: `(802, 2836)`
+   * Audio (20) + Visual (2048) + Text (768) → Total **2836 dimensions** per video
+   * Final dataset shape: `(802, 2836)`
 
 ---
 
 ## 🔍 Exploratory Data Analysis (EDA)
 
-- **Distribusi label tidak seimbang** → _Surprise_ dominan, _Neutral_ paling sedikit.
-- **t-SNE visualization** → cluster tidak terpisah jelas, kelas bercampur.
-- **EDA Label**
+* **Imbalanced label distribution** → *Surprise* is dominant, *Neutral* is the least frequent.
+* **t-SNE visualization** → clusters are not clearly separated, classes are mixed.
+* **Label EDA**
 
-  - Jumlah kelas unik: 8
-  - Label terbanyak: _Surprise_
-  - Label tersedikit: _Neutral_
+  * Number of unique classes: 8
+  * Most frequent label: *Surprise*
+  * Least frequent label: *Neutral*
 
 ---
 
 ## 🧠 Modeling
 
-### Pendekatan:
+### Approach:
 
-- Model utama: **XGBoost Classifier**
-- Penanganan imbalance: **SMOTE**
-- Validasi: **Cross-validation (5-fold)**
-- Evaluasi tambahan: **ROC-AUC Macro**
+* Main model: **XGBoost Classifier**
+* Imbalance handling: **SMOTE**
+* Validation: **5-fold Cross-validation**
+* Additional evaluation: **Macro ROC-AUC**
 
-### Hasil Evaluasi
+### Evaluation Results
 
-- **Confusion Matrix (ringkasan):**
+* **Confusion Matrix (summary):**
 
-  - Anger, Fear, Joy, Neutral, Sadness → hampir sempurna
-  - Proud, Surprise, Trust → sering tertukar (mirip secara semantik)
+  * Anger, Fear, Joy, Neutral, Sadness → nearly perfect
+  * Proud, Surprise, Trust → frequently confused (semantically similar)
 
-- **Metric:**
+* **Metrics:**
 
-  - Macro ROC-AUC: **0.9844**
-  - Cross-val F1 Macro (per fold): `[0.8803, 0.8829, 0.8767, 0.8556, 0.8838]`
-  - Mean CV F1 Macro: **0.8759**
+  * Macro ROC-AUC: **0.9844**
+  * Cross-val Macro F1 (per fold): `[0.8803, 0.8829, 0.8767, 0.8556, 0.8838]`
+  * Mean CV Macro F1: **0.8759**
 
-👉 Kesimpulan:
-Model performa **sangat baik**, dengan tantangan utama di kelas **Proud/Surprise/Trust** yang secara emosional dekat.
+👉 Conclusion:
+The model shows **very strong performance**, with the main challenge being the **Proud / Surprise / Trust** classes, which are emotionally close.
 
 ---
 
-## 📊 Kesimpulan
+## 📊 Conclusion
 
-- Pipeline **end-to-end** berhasil dibangun mulai dari raw video → fitur multimodal → model klasifikasi.
-- Hasil evaluasi menunjukkan performa tinggi (**F1 Macro \~0.876**) dan konsisten antar fold.
-- Tantangan utama: overlap antar emosi mirip (_Proud, Surprise, Trust_).
+* An **end-to-end pipeline** was successfully built, from raw video → multimodal features → classification model.
+* Evaluation results show high performance (**Macro F1 ≈ 0.876**) and consistency across folds.
+* The main challenge lies in the overlap between similar emotions (*Proud, Surprise, Trust*).
 
 ---
 
 ## 🚀 Next Steps
 
-- **Optional improvement:**
+* **Optional improvements:**
 
-  - Hyperparameter tuning (XGBoost, Random Forest, LightGBM)
-  - Eksperimen dengan model multimodal lebih canggih (misalnya fusion layer, transformer-based multimodal)
-  - Feature engineering tambahan
+  * Hyperparameter tuning (XGBoost, Random Forest, LightGBM)
+  * Experiments with more advanced multimodal models (e.g., fusion layers, transformer-based multimodal models)
+  * Additional feature engineering
 
-- **Untuk Submission:**
+* **For Submission:**
 
-  - Prediksi data test disimpan dalam format `submission+NamaTim.csv` sesuai template.
-  - Format kolom: `id, predicted` (0–7 sesuai label mapping).
+  * Test predictions are saved in `submission+TeamName.csv` format following the provided template.
+  * Column format: `id, predicted` (0–7 according to label mapping).
 
 ---
 
@@ -144,11 +144,11 @@ Model performa **sangat baik**, dengan tantangan utama di kelas **Proud/Surprise
 
 1. **Environment**
 
-   - Disarankan gunakan **Conda/venv**
-   - Buat file `requirements.txt` dengan `pip freeze > requirements.txt`
-   - Alternatif: buat `environment.yml` untuk conda
+   * Recommended to use **Conda/venv**
+   * Create `requirements.txt` using `pip freeze > requirements.txt`
+   * Alternatively, create `environment.yml` for conda
 
-2. **Folder Structure (final):**
+2. **Final Folder Structure:**
 
 ```
 BDC2025/
@@ -174,8 +174,8 @@ BDC2025/
 
 ---
 
-## 📝 Catatan
+## 📝 Notes
 
-- Beberapa video gagal diunduh (28 train, 2 test) → dibiarkan missing.
-- Librosa sempat crash → diselesaikan dengan downgrade versi.
-- Ekstraksi fitur memakan waktu cukup lama (\~5 jam total).
+* Some videos failed to download (28 train, 2 test) → left as missing.
+* Librosa experienced crashes → resolved by downgrading the version.
+* Feature extraction required a considerable amount of time (~5 hours total).
